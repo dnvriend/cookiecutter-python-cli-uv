@@ -1,0 +1,10 @@
+{% if cookiecutter.use_mise -%}
+# mise configuration for {{ cookiecutter.project_slug }}
+
+[tools]
+python = "{{ cookiecutter.python_version }}"
+
+[env]
+# Ensure project uses local virtual environment
+_.python.venv = { path = ".venv", create = true }
+{% endif -%}

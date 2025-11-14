@@ -1,0 +1,15 @@
+{
+    "project_name": "My CLI Tool",
+    "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+    "package_name": "{{ cookiecutter.project_slug.replace('-', '_') }}",
+    "cli_command": "{{ cookiecutter.project_slug }}",
+    "project_description": "A Python CLI tool",
+    "author_name": "Dennis Vriend",
+    "author_email": "",
+    "github_username": "dennisvriend",
+    "python_version": "3.14",
+    "use_mise": true,
+    "license": ["MIT", "Apache-2.0", "BSD-3", "GPL-3.0", "Not open source"],
+    "line_length": "100",
+    "version": "0.1.0"
+}

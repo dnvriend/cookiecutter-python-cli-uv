@@ -1,0 +1,45 @@
+[project]
+name = "{{ cookiecutter.project_slug }}"
+version = "{{ cookiecutter.version }}"
+description = "{{ cookiecutter.project_description }}"
+requires-python = ">={{ cookiecutter.python_version }}"
+dependencies = [
+    "click>=8.1.7",
+]
+authors = [
+    {name = "{{ cookiecutter.author_name }}"{% if cookiecutter.author_email %}, email = "{{ cookiecutter.author_email }}"{% endif %}}
+]
+{% if cookiecutter.license != "Not open source" -%}
+license = {text = "{{ cookiecutter.license }}"}
+{% endif -%}
+readme = "README.md"
+
+[project.scripts]
+{{ cookiecutter.cli_command }} = "{{ cookiecutter.package_name }}.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.7.0",
+    "pytest>=7.4.0",
+]
+
+[tool.ruff]
+line-length = {{ cookiecutter.line_length }}
+target-version = "py{{ cookiecutter.python_version.replace('.', '') }}"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "{{ cookiecutter.python_version }}"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+strict = true
