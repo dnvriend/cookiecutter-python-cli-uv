@@ -27,6 +27,9 @@
 - `ruff` - Linting and formatting
 - `mypy` - Type checking
 - `pytest` - Testing framework
+- `bandit` - Security linting
+- `pip-audit` - Dependency vulnerability scanning
+- `gitleaks` - Secret detection (requires separate installation)
 
 ## CLI Arguments
 
@@ -89,12 +92,37 @@ make typecheck
 # Run tests
 make test
 
-# Run all checks
+# Security scanning
+make security-bandit       # Python security linting
+make security-pip-audit    # Dependency CVE scanning
+make security-gitleaks     # Secret detection
+make security              # Run all security checks
+
+# Run all checks (includes security)
 make check
 
-# Full pipeline
+# Full pipeline (includes security)
 make pipeline
 ```
+
+## Security
+
+The template includes three lightweight security tools:
+
+1. **bandit** - Python code security linting
+   - Detects: SQL injection, hardcoded secrets, unsafe functions
+   - Speed: ~2-3 seconds
+
+2. **pip-audit** - Dependency vulnerability scanning
+   - Detects: Known CVEs in dependencies
+   - Speed: ~2-3 seconds
+
+3. **gitleaks** - Secret and API key detection
+   - Detects: AWS keys, GitHub tokens, API keys, private keys
+   - Speed: ~1 second
+   - Requires: `brew install gitleaks` (macOS)
+
+All security checks run automatically in `make check` and `make pipeline`.
 
 ## Installation Methods
 

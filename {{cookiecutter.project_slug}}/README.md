@@ -19,6 +19,7 @@
 - [Usage](#usage)
 - [Development](#development)
 - [Testing](#testing)
+- [Security](#security)
 - [Contributing](#contributing)
 {% if cookiecutter.license != "Not open source" -%}
 - [License](#license)
@@ -34,6 +35,7 @@
 - ✅ Type-safe with mypy strict mode
 - ✅ Linted with ruff
 - ✅ Tested with pytest
+- 🔒 Security scanning with bandit, pip-audit, and gitleaks
 - ✅ Modern Python tooling (uv, {% if cookiecutter.use_mise %}mise, {% endif %}click)
 
 ## Installation
@@ -101,16 +103,20 @@ make help
 ### Available Make Commands
 
 ```bash
-make install          # Install dependencies
-make format           # Format code with ruff
-make lint             # Run linting with ruff
-make typecheck        # Run type checking with mypy
-make test             # Run tests with pytest
-make check            # Run all checks (lint, typecheck, test)
-make pipeline         # Run full pipeline (format, lint, typecheck, test, build, install-global)
-make build            # Build package
-make run ARGS="..."   # Run {{ cookiecutter.cli_command }} locally
-make clean            # Remove build artifacts
+make install                 # Install dependencies
+make format                  # Format code with ruff
+make lint                    # Run linting with ruff
+make typecheck               # Run type checking with mypy
+make test                    # Run tests with pytest
+make security-bandit         # Python security linter
+make security-pip-audit      # Dependency vulnerability scanner
+make security-gitleaks       # Secret/API key detection
+make security                # Run all security checks
+make check                   # Run all checks (lint, typecheck, test, security)
+make pipeline                # Run full pipeline (format, lint, typecheck, test, security, build, install-global)
+make build                   # Build package
+make run ARGS="..."          # Run {{ cookiecutter.cli_command }} locally
+make clean                   # Remove build artifacts
 ```
 
 ### Project Structure
@@ -150,6 +156,53 @@ uv run pytest tests/test_utils.py
 # Run with coverage
 uv run pytest tests/ --cov={{ cookiecutter.package_name }}
 ```
+
+## Security
+
+The project includes lightweight security tools providing 80%+ coverage with fast scan times:
+
+### Security Tools
+
+| Tool | Purpose | Speed | Coverage |
+|------|---------|-------|----------|
+| **bandit** | Python code security linting | ⚡⚡ Fast | SQL injection, hardcoded secrets, unsafe functions |
+| **pip-audit** | Dependency vulnerability scanning | ⚡⚡ Fast | Known CVEs in dependencies |
+| **gitleaks** | Secret and API key detection | ⚡⚡⚡ Very Fast | Secrets in code and git history |
+
+### Running Security Scans
+
+```bash
+# Run all security checks (~5-8 seconds)
+make security
+
+# Or run individually
+make security-bandit       # Python security linting
+make security-pip-audit    # Dependency CVE scanning
+make security-gitleaks     # Secret detection
+```
+
+### Prerequisites
+
+gitleaks must be installed separately:
+
+```bash
+# macOS
+brew install gitleaks
+
+# Linux
+# See: https://github.com/gitleaks/gitleaks#installation
+```
+
+Security checks run automatically in `make check` and `make pipeline`.
+
+### What's Protected
+
+- ✅ AWS credentials (AKIA*, ASIA*, etc.)
+- ✅ GitHub tokens (ghp_*, gho_*, etc.)
+- ✅ API keys and secrets
+- ✅ Private keys
+- ✅ Slack tokens
+- ✅ 100+ other secret types
 
 ## Contributing
 
