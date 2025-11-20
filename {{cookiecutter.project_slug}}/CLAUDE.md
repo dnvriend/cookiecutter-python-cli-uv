@@ -39,6 +39,10 @@
 
 ### Options
 
+- `-v, --verbose` - Enable verbose output (count flag: -v, -vv, -vvv)
+  - `-v` (count=1): INFO level logging
+  - `-vv` (count=2): DEBUG level logging
+  - `-vvv` (count=3+): TRACE level (includes library internals)
 - `--help` / `-h` - Show help message
 - `--version` - Show version
 
@@ -48,21 +52,24 @@
 {{ cookiecutter.project_slug }}/
 ├── {{ cookiecutter.package_name }}/
 │   ├── __init__.py
-│   ├── cli.py           # Click CLI entry point
-│   └── utils.py         # Utility functions
+│   ├── cli.py            # Click CLI entry point (group with subcommands)
+│   ├── completion.py     # Shell completion command
+│   ├── logging_config.py # Multi-level verbosity logging
+│   └── utils.py          # Utility functions
 ├── tests/
 │   ├── __init__.py
 │   └── test_utils.py
-├── pyproject.toml       # Project configuration
-├── README.md            # User documentation
-├── CLAUDE.md            # This file
-├── Makefile             # Development commands
+├── pyproject.toml        # Project configuration
+├── README.md             # User documentation
+├── CLAUDE.md             # This file
+├── Makefile              # Development commands
 {% if cookiecutter.license != "Not open source" -%}
-├── LICENSE              # {{ cookiecutter.license }} License
+├── LICENSE               # {{ cookiecutter.license }} License
 {% endif -%}
 {% if cookiecutter.use_mise -%}
-├── .mise.toml           # mise configuration
+├── .mise.toml            # mise configuration
 {% endif -%}
+├── .gitleaks.toml        # Gitleaks configuration
 └── .gitignore
 ```
 
@@ -123,6 +130,113 @@ The template includes three lightweight security tools:
    - Requires: `brew install gitleaks` (macOS)
 
 All security checks run automatically in `make check` and `make pipeline`.
+
+## Multi-Level Verbosity Logging
+
+The template includes a centralized logging system with progressive verbosity levels.
+
+### Implementation Pattern
+
+1. **logging_config.py** - Centralized logging configuration
+   - `setup_logging(verbose_count)` - Configure logging based on -v count
+   - `get_logger(name)` - Get logger instance for module
+   - Maps verbosity to Python logging levels (WARNING/INFO/DEBUG)
+
+2. **CLI Integration** - Add to every CLI command
+   ```python
+   from {{ cookiecutter.package_name }}.logging_config import get_logger, setup_logging
+
+   logger = get_logger(__name__)
+
+   @click.command()
+   @click.option("-v", "--verbose", count=True, help="...")
+   def command(verbose: int):
+       setup_logging(verbose)  # First thing in command
+       logger.info("Operation started")
+       logger.debug("Detailed info")
+   ```
+
+3. **Logging Levels**
+   - **0 (no -v)**: WARNING only - production/quiet mode
+   - **1 (-v)**: INFO - high-level operations
+   - **2 (-vv)**: DEBUG - detailed debugging
+   - **3+ (-vvv)**: TRACE - enable library internals
+
+4. **Best Practices**
+   - Always log to stderr (keeps stdout clean for piping)
+   - Use structured messages with placeholders: `logger.info("Found %d items", count)`
+   - Call `setup_logging()` first in every command
+   - Use `get_logger(__name__)` at module level
+   - For TRACE level, enable third-party library loggers in `logging_config.py`
+
+5. **Customizing Library Logging**
+   Edit `logging_config.py` to add project-specific libraries:
+   ```python
+   if verbose_count >= 3:
+       logging.getLogger("requests").setLevel(logging.DEBUG)
+       logging.getLogger("urllib3").setLevel(logging.DEBUG)
+   ```
+
+## Shell Completion
+
+The template includes shell completion for bash, zsh, and fish following the Click Shell Completion Pattern.
+
+### Implementation
+
+1. **completion.py** - Separate module for completion command
+   - Uses Click's `BashComplete`, `ZshComplete`, `FishComplete` classes
+   - Generates shell-specific completion scripts
+   - Includes installation instructions in help text
+
+2. **CLI Integration** - Added as subcommand
+   ```python
+   from {{ cookiecutter.package_name }}.completion import completion_command
+
+   @click.group(invoke_without_command=True)
+   def main(ctx: click.Context):
+       # Default behavior when no subcommand
+       if ctx.invoked_subcommand is None:
+           # Main command logic here
+           pass
+
+   # Add completion subcommand
+   main.add_command(completion_command)
+   ```
+
+3. **Usage Pattern** - User-friendly command
+   ```bash
+   # Generate completion script
+   {{ cookiecutter.cli_command }} completion bash
+   {{ cookiecutter.cli_command }} completion zsh
+   {{ cookiecutter.cli_command }} completion fish
+
+   # Install (eval or save to file)
+   eval "$({{ cookiecutter.cli_command }} completion bash)"
+   ```
+
+4. **Supported Shells**
+   - **Bash** (≥ 4.4) - Uses bash-completion
+   - **Zsh** (any recent) - Uses zsh completion system
+   - **Fish** (≥ 3.0) - Uses fish completion system
+   - **PowerShell** - Not supported by Click
+
+5. **Installation Methods**
+   - **Temporary**: `eval "$({{ cookiecutter.cli_command }} completion bash)"`
+   - **Permanent**: Add eval to ~/.bashrc or ~/.zshrc
+   - **File-based** (recommended): Save to dedicated completion file
+
+### Adding More Commands
+
+The CLI uses `@click.group()` for extensibility. To add new commands:
+
+1. Create new command module in `{{ cookiecutter.package_name }}/`
+2. Import and add to CLI group:
+   ```python
+   from {{ cookiecutter.package_name }}.new_command import new_command
+   main.add_command(new_command)
+   ```
+
+3. Completion will automatically work for new commands and their options
 
 ## Installation Methods
 

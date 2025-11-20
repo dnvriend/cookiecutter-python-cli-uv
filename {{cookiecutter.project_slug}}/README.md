@@ -17,6 +17,8 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Multi-Level Verbosity Logging](#multi-level-verbosity-logging)
+- [Shell Completion](#shell-completion)
 - [Development](#development)
 - [Testing](#testing)
 - [Security](#security)
@@ -35,6 +37,8 @@
 - ✅ Type-safe with mypy strict mode
 - ✅ Linted with ruff
 - ✅ Tested with pytest
+- 📊 Multi-level verbosity logging (-v/-vv/-vvv)
+- 🐚 Shell completion for bash, zsh, and fish
 - 🔒 Security scanning with bandit, pip-audit, and gitleaks
 - ✅ Modern Python tooling (uv, {% if cookiecutter.use_mise %}mise, {% endif %}click)
 
@@ -82,6 +86,146 @@ uv tool install .
 
 # Run the tool
 {{ cookiecutter.cli_command }}
+
+# Run with verbose output
+{{ cookiecutter.cli_command }} -v      # INFO level
+{{ cookiecutter.cli_command }} -vv     # DEBUG level
+{{ cookiecutter.cli_command }} -vvv    # TRACE level (includes library internals)
+```
+
+## Multi-Level Verbosity Logging
+
+The CLI supports progressive verbosity levels for debugging and troubleshooting. All logs output to stderr, keeping stdout clean for data piping.
+
+### Logging Levels
+
+| Flag | Level | Output | Use Case |
+|------|-------|--------|----------|
+| (none) | WARNING | Errors and warnings only | Production, quiet mode |
+| `-v` | INFO | + High-level operations | Normal debugging |
+| `-vv` | DEBUG | + Detailed info, full tracebacks | Development, troubleshooting |
+| `-vvv` | TRACE | + Library internals | Deep debugging |
+
+### Examples
+
+```bash
+# Quiet mode - only errors and warnings
+{{ cookiecutter.cli_command }}
+
+# INFO - see operations and progress
+{{ cookiecutter.cli_command }} -v
+# Output:
+# [INFO] {{ cookiecutter.cli_command }} started
+# [INFO] {{ cookiecutter.cli_command }} completed
+
+# DEBUG - see detailed information
+{{ cookiecutter.cli_command }} -vv
+# Output:
+# [INFO] {{ cookiecutter.cli_command }} started
+# [DEBUG] Running with verbose level: 2
+# [INFO] {{ cookiecutter.cli_command }} completed
+
+# TRACE - see library internals (configure in logging_config.py)
+{{ cookiecutter.cli_command }} -vvv
+```
+
+### Customizing Library Logging
+
+To enable DEBUG logging for third-party libraries at TRACE level (-vvv), edit `{{ cookiecutter.package_name }}/logging_config.py`:
+
+```python
+# Configure dependent library loggers at TRACE level (-vvv)
+if verbose_count >= 3:
+    logging.getLogger("requests").setLevel(logging.DEBUG)
+    logging.getLogger("urllib3").setLevel(logging.DEBUG)
+    # Add your project-specific library loggers here
+```
+
+## Shell Completion
+
+The CLI provides native shell completion for bash, zsh, and fish shells.
+
+### Supported Shells
+
+| Shell | Version Requirement | Status |
+|-------|-------------------|--------|
+| **Bash** | ≥ 4.4 | ✅ Supported |
+| **Zsh** | Any recent version | ✅ Supported |
+| **Fish** | ≥ 3.0 | ✅ Supported |
+| **PowerShell** | Any version | ❌ Not Supported |
+
+### Installation
+
+#### Quick Setup (Temporary)
+
+```bash
+# Bash - active for current session only
+eval "$({{ cookiecutter.cli_command }} completion bash)"
+
+# Zsh - active for current session only
+eval "$({{ cookiecutter.cli_command }} completion zsh)"
+
+# Fish - active for current session only
+{{ cookiecutter.cli_command }} completion fish | source
+```
+
+#### Permanent Setup (Recommended)
+
+```bash
+# Bash - add to ~/.bashrc
+echo 'eval "$({{ cookiecutter.cli_command }} completion bash)"' >> ~/.bashrc
+source ~/.bashrc
+
+# Zsh - add to ~/.zshrc
+echo 'eval "$({{ cookiecutter.cli_command }} completion zsh)"' >> ~/.zshrc
+source ~/.zshrc
+
+# Fish - save to completions directory
+mkdir -p ~/.config/fish/completions
+{{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+```
+
+#### File-based Installation (Better Performance)
+
+For better shell startup performance, generate completion scripts to files:
+
+```bash
+# Bash
+{{ cookiecutter.cli_command }} completion bash > ~/.{{ cookiecutter.cli_command }}-complete.bash
+echo 'source ~/.{{ cookiecutter.cli_command }}-complete.bash' >> ~/.bashrc
+
+# Zsh
+{{ cookiecutter.cli_command }} completion zsh > ~/.{{ cookiecutter.cli_command }}-complete.zsh
+echo 'source ~/.{{ cookiecutter.cli_command }}-complete.zsh' >> ~/.zshrc
+
+# Fish (automatic loading from completions directory)
+mkdir -p ~/.config/fish/completions
+{{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+```
+
+### Usage
+
+Once installed, completion works automatically:
+
+```bash
+# Tab completion for commands
+{{ cookiecutter.cli_command }} <TAB>
+# Shows: completion
+
+# Tab completion for options
+{{ cookiecutter.cli_command }} --<TAB>
+# Shows: --verbose --version --help
+
+# Tab completion for shell types
+{{ cookiecutter.cli_command }} completion <TAB>
+# Shows: bash zsh fish
+```
+
+### Getting Help
+
+```bash
+# View completion installation instructions
+{{ cookiecutter.cli_command }} completion --help
 ```
 
 ## Development
