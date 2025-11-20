@@ -1,0 +1,19 @@
+{
+    "name": "{{cookiecutter.project_slug}}",
+    "owner": {
+        "name": "{{cookiecutter.author_name}}",
+        "email": "{{cookiecutter.author_email}}",
+        "url": "https://github.com/{{cookiecutter.github_username}}"
+    },
+    "metadata": {
+        "description": "Marketplace for {{cookiecutter.project_slug}} CLI plugin - {{cookiecutter.project_description}}",
+        "version": "{{cookiecutter.version}}"
+    },
+    "plugins": [
+        {
+            "name": "{{cookiecutter.project_slug}}",
+            "source": "./plugins/{{cookiecutter.project_slug}}",
+            "description": "{{cookiecutter.project_description}}"
+        }
+    ]
+}
