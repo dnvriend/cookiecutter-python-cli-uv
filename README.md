@@ -19,6 +19,8 @@ A modern Python CLI project template using **uv**, **mise**, **ruff**, **mypy**,
 - ✅ **Git Ready**: Automatic git initialization with initial commit
 - ✅ **AI Attribution**: Module docstrings and README credit for AI-generated code
 - ✅ **Optional mise**: Python version management with mise (optional)
+- ✅ **PyPI Publishing**: GitHub Actions workflow for automated PyPI publishing with trusted publishing
+- ✅ **Security Scanning**: bandit, pip-audit, and gitleaks integration
 
 ## Requirements
 

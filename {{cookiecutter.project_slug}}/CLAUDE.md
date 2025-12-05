@@ -259,3 +259,64 @@ After installation, `{{ cookiecutter.cli_command }}` command is available global
 uv sync
 uv run {{ cookiecutter.cli_command }} [args]
 ```
+
+## Publishing to PyPI
+
+The template includes GitHub Actions workflow for automated PyPI publishing with trusted publishing (no API tokens required).
+
+### Setup PyPI Trusted Publishing
+
+1. **Create PyPI Account** at https://pypi.org/account/register/
+   - Enable 2FA (required)
+   - Verify email
+
+2. **Configure Trusted Publisher** at https://pypi.org/manage/account/publishing/
+   - Click "Add a new pending publisher"
+   - **PyPI Project Name**: `{{ cookiecutter.project_slug }}`
+   - **Owner**: `{{ cookiecutter.github_username }}`
+   - **Repository name**: `{{ cookiecutter.project_slug }}`
+   - **Workflow name**: `publish.yml`
+   - **Environment name**: `pypi`
+
+3. **(Optional) Configure TestPyPI** at https://test.pypi.org/manage/account/publishing/
+   - Same settings but use environment: `testpypi`
+
+### Publishing Workflow
+
+The `.github/workflows/publish.yml` workflow:
+- Builds on every push
+- Publishes to TestPyPI and PyPI on git tags (v*)
+- Uses trusted publishing (no secrets needed)
+
+### Create a Release
+
+```bash
+# Commit your changes
+git add .
+git commit -m "Release v{{ cookiecutter.version }}"
+git push
+
+# Create and push tag
+git tag v{{ cookiecutter.version }}
+git push origin v{{ cookiecutter.version }}
+```
+
+The workflow automatically builds and publishes to PyPI.
+
+### Install from PyPI
+
+After publishing, users can install with:
+
+```bash
+pip install {{ cookiecutter.project_slug }}
+```
+
+### Build Locally
+
+```bash
+# Build package with force rebuild (avoids cache issues)
+make build
+
+# Output in dist/
+ls dist/
+```

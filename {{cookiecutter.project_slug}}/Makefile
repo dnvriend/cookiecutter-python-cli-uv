@@ -43,10 +43,11 @@ clean: ## Remove build artifacts and cache
 run: ## Run {{ cookiecutter.cli_command }} (usage: make run ARGS="...")
 	uv run {{ cookiecutter.cli_command }} $(ARGS)
 
-build: ## Build package
-	uv build
+build: ## Build package (force rebuild)
+	uv build --force-pep517
 
-install-global: ## Install globally with uv tool
+install-global: build ## Install globally with uv tool (rebuilds first to avoid cache issues)
+	-uv tool uninstall {{ cookiecutter.project_slug }} 2>/dev/null
 	uv tool install . --reinstall
 
 uninstall-global: ## Uninstall global installation
