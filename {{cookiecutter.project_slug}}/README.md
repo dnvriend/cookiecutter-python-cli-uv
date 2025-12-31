@@ -18,6 +18,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Multi-Level Verbosity Logging](#multi-level-verbosity-logging)
+- [OpenTelemetry Observability](#opentelemetry-observability)
 - [Shell Completion](#shell-completion)
 - [Development](#development)
 - [Testing](#testing)
@@ -38,9 +39,10 @@
 - ✅ Linted with ruff
 - ✅ Tested with pytest
 - 📊 Multi-level verbosity logging (-v/-vv/-vvv)
+- 📡 OpenTelemetry observability (traces, metrics, logs)
 - 🐚 Shell completion for bash, zsh, and fish
 - 🔒 Security scanning with bandit, pip-audit, and gitleaks
-- ✅ Modern Python tooling (uv, {% if cookiecutter.use_mise %}mise, {% endif %}click)
+- ✅ Modern Python tooling (uv, {% if cookiecutter.use_mise %}mise, {% endif %}typer)
 
 ## Installation
 
@@ -141,6 +143,57 @@ if verbose_count >= 3:
     # Add your project-specific library loggers here
 ```
 
+## OpenTelemetry Observability
+
+The CLI supports OpenTelemetry for distributed tracing, metrics, and logs. Designed for integration with Grafana stack (Alloy, Tempo, Prometheus).
+
+### Installation
+
+```bash
+# Install with telemetry support
+pip install {{ cookiecutter.project_slug }}[telemetry]
+# or with uv
+uv add "{{ cookiecutter.project_slug }}[telemetry]"
+```
+
+### Quick Start
+
+```bash
+# Enable telemetry via CLI flag
+{{ cookiecutter.cli_command }} --telemetry
+
+# Or via environment variable
+export OTEL_ENABLED=true
+{{ cookiecutter.cli_command }}
+```
+
+### Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OTEL_ENABLED` | `false` | Enable telemetry |
+| `OTEL_SERVICE_NAME` | `{{ cookiecutter.project_slug }}` | Service name in traces |
+| `OTEL_EXPORTER_TYPE` | `console` | `console` or `otlp` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4317` | OTLP endpoint |
+
+### Production Setup (Grafana Alloy)
+
+```bash
+export OTEL_ENABLED=true
+export OTEL_EXPORTER_TYPE=otlp
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
+{{ cookiecutter.cli_command }}
+```
+
+### Development Mode
+
+```bash
+# Console output with verbose logging
+{{ cookiecutter.cli_command }} --telemetry -vv
+```
+
+See [CLAUDE.md](CLAUDE.md) for detailed usage patterns and Grafana Alloy configuration.
+
 ## Shell Completion
 
 The CLI provides native shell completion for bash, zsh, and fish shells.
@@ -160,29 +213,29 @@ The CLI provides native shell completion for bash, zsh, and fish shells.
 
 ```bash
 # Bash - active for current session only
-eval "$({{ cookiecutter.cli_command }} completion bash)"
+eval "$({{ cookiecutter.cli_command }} completion generate bash)"
 
 # Zsh - active for current session only
-eval "$({{ cookiecutter.cli_command }} completion zsh)"
+eval "$({{ cookiecutter.cli_command }} completion generate zsh)"
 
 # Fish - active for current session only
-{{ cookiecutter.cli_command }} completion fish | source
+{{ cookiecutter.cli_command }} completion generate fish | source
 ```
 
 #### Permanent Setup (Recommended)
 
 ```bash
 # Bash - add to ~/.bashrc
-echo 'eval "$({{ cookiecutter.cli_command }} completion bash)"' >> ~/.bashrc
+echo 'eval "$({{ cookiecutter.cli_command }} completion generate bash)"' >> ~/.bashrc
 source ~/.bashrc
 
 # Zsh - add to ~/.zshrc
-echo 'eval "$({{ cookiecutter.cli_command }} completion zsh)"' >> ~/.zshrc
+echo 'eval "$({{ cookiecutter.cli_command }} completion generate zsh)"' >> ~/.zshrc
 source ~/.zshrc
 
 # Fish - save to completions directory
 mkdir -p ~/.config/fish/completions
-{{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+{{ cookiecutter.cli_command }} completion generate fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
 ```
 
 #### File-based Installation (Better Performance)
@@ -191,16 +244,16 @@ For better shell startup performance, generate completion scripts to files:
 
 ```bash
 # Bash
-{{ cookiecutter.cli_command }} completion bash > ~/.{{ cookiecutter.cli_command }}-complete.bash
+{{ cookiecutter.cli_command }} completion generate bash > ~/.{{ cookiecutter.cli_command }}-complete.bash
 echo 'source ~/.{{ cookiecutter.cli_command }}-complete.bash' >> ~/.bashrc
 
 # Zsh
-{{ cookiecutter.cli_command }} completion zsh > ~/.{{ cookiecutter.cli_command }}-complete.zsh
+{{ cookiecutter.cli_command }} completion generate zsh > ~/.{{ cookiecutter.cli_command }}-complete.zsh
 echo 'source ~/.{{ cookiecutter.cli_command }}-complete.zsh' >> ~/.zshrc
 
 # Fish (automatic loading from completions directory)
 mkdir -p ~/.config/fish/completions
-{{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+{{ cookiecutter.cli_command }} completion generate fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
 ```
 
 ### Usage
@@ -217,7 +270,7 @@ Once installed, completion works automatically:
 # Shows: --verbose --version --help
 
 # Tab completion for shell types
-{{ cookiecutter.cli_command }} completion <TAB>
+{{ cookiecutter.cli_command }} completion generate <TAB>
 # Shows: bash zsh fish
 ```
 
@@ -380,7 +433,7 @@ This project is licensed under the {{ cookiecutter.license }} License - see the 
 {% endif %}
 ## Acknowledgments
 
-- Built with [Click](https://click.palletsprojects.com/) for CLI framework
+- Built with [Typer](https://typer.tiangolo.com/) for CLI framework
 - Developed with [uv](https://github.com/astral-sh/uv) for fast Python tooling
 
 ---

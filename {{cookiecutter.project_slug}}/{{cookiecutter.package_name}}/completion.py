@@ -4,48 +4,59 @@ Note: This code was generated with assistance from AI coding tools
 and has been reviewed and tested by a human.
 """
 
-import click
+from enum import Enum
+
+import typer
 from click.shell_completion import BashComplete, FishComplete, ShellComplete, ZshComplete
 
+completion_app = typer.Typer(help="Generate shell completion scripts.")
 
-@click.command(name="completion")
-@click.argument("shell", type=click.Choice(["bash", "zsh", "fish"], case_sensitive=False))
-def completion_command(shell: str) -> None:
+
+class Shell(str, Enum):
+    """Supported shell types for completion."""
+
+    bash = "bash"
+    zsh = "zsh"
+    fish = "fish"
+
+
+@completion_app.command(name="generate")
+def generate_completion(
+    shell: Shell = typer.Argument(..., help="Shell type (bash, zsh, fish)"),
+) -> None:
     """Generate shell completion script.
-
-    SHELL: The shell type (bash, zsh, fish)
 
     Install instructions:
 
     \b
     # Bash (add to ~/.bashrc):
-    eval "$({{ cookiecutter.cli_command }} completion bash)"
+    eval "$({{ cookiecutter.cli_command }} completion generate bash)"
 
     \b
     # Zsh (add to ~/.zshrc):
-    eval "$({{ cookiecutter.cli_command }} completion zsh)"
+    eval "$({{ cookiecutter.cli_command }} completion generate zsh)"
 
     \b
     # Fish (add to ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish):
-    {{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+    {{ cookiecutter.cli_command }} completion generate fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
 
     \b
     File-based Installation (Recommended for better performance):
 
     \b
     # Bash
-    {{ cookiecutter.cli_command }} completion bash > ~/.{{ cookiecutter.cli_command }}-complete.bash
+    {{ cookiecutter.cli_command }} completion generate bash > ~/.{{ cookiecutter.cli_command }}-complete.bash
     echo 'source ~/.{{ cookiecutter.cli_command }}-complete.bash' >> ~/.bashrc
 
     \b
     # Zsh
-    {{ cookiecutter.cli_command }} completion zsh > ~/.{{ cookiecutter.cli_command }}-complete.zsh
+    {{ cookiecutter.cli_command }} completion generate zsh > ~/.{{ cookiecutter.cli_command }}-complete.zsh
     echo 'source ~/.{{ cookiecutter.cli_command }}-complete.zsh' >> ~/.zshrc
 
     \b
     # Fish (automatic loading)
     mkdir -p ~/.config/fish/completions
-    {{ cookiecutter.cli_command }} completion fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
+    {{ cookiecutter.cli_command }} completion generate fish > ~/.config/fish/completions/{{ cookiecutter.cli_command }}.fish
 
     \b
     Supported Shells:
@@ -54,25 +65,27 @@ def completion_command(shell: str) -> None:
       - Fish (≥ 3.0)
 
     \b
-    Note: PowerShell is not currently supported by Click's completion system.
+    Note: PowerShell is not currently supported.
     """
-    ctx = click.get_current_context()
+    from {{ cookiecutter.package_name }}.cli import app
 
-    # Get the appropriate completion class
     completion_classes: dict[str, type[ShellComplete]] = {
         "bash": BashComplete,
         "zsh": ZshComplete,
         "fish": FishComplete,
     }
 
-    completion_class = completion_classes.get(shell.lower())
+    # Get the Click command from the Typer app
+    click_command = typer.main.get_command(app)
+
+    completion_class = completion_classes.get(shell.value)
     if completion_class:
         completer = completion_class(
-            cli=ctx.find_root().command,
+            cli=click_command,
             ctx_args={},
             prog_name="{{ cookiecutter.cli_command }}",
             complete_var="_{{ cookiecutter.cli_command.upper().replace('-', '_') }}_COMPLETE",
         )
-        click.echo(completer.source())
+        typer.echo(completer.source())
     else:
-        raise click.BadParameter(f"Unsupported shell: {shell}")
+        raise typer.BadParameter(f"Unsupported shell: {shell}")

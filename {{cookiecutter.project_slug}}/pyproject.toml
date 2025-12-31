@@ -3,9 +3,6 @@ name = "{{ cookiecutter.project_slug }}"
 version = "{{ cookiecutter.version }}"
 description = "{{ cookiecutter.project_description }}"
 requires-python = ">={{ cookiecutter.python_version }}"
-dependencies = [
-    "click>=8.1.7",
-]
 authors = [
     {name = "{{ cookiecutter.author_name }}"{% if cookiecutter.author_email %}, email = "{{ cookiecutter.author_email }}"{% endif %}}
 ]
@@ -23,6 +20,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: {{ cookiecutter.python_version }}",
 ]
+dependencies = [
+    "typer>=0.15.0",
+]
+
+[project.optional-dependencies]
+telemetry = [
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
@@ -30,7 +37,7 @@ Repository = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecut
 Issues = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/issues"
 
 [project.scripts]
-{{ cookiecutter.cli_command }} = "{{ cookiecutter.package_name }}.cli:main"
+{{ cookiecutter.cli_command }} = "{{ cookiecutter.package_name }}.cli:app"
 
 [build-system]
 requires = ["hatchling"]

@@ -4,8 +4,8 @@
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install dependencies
-	uv sync
+install: ## Install dependencies (including telemetry extras for type checking)
+	uv sync --extra telemetry
 
 lint: ## Run linting with ruff
 	uv run ruff check .
@@ -31,9 +31,9 @@ security-gitleaks: ## Run gitleaks secret scanner
 
 security: security-bandit security-pip-audit security-gitleaks ## Run all security checks
 
-check: lint typecheck test security ## Run all checks (lint, typecheck, test, security)
+check: install lint typecheck test security ## Run all checks (lint, typecheck, test, security)
 
-pipeline: format lint typecheck test security build install-global ## Run full pipeline (format, lint, typecheck, test, security, build, install-global)
+pipeline: install format lint typecheck test security build install-global ## Run full pipeline (format, lint, typecheck, test, security, build, install-global)
 
 clean: ## Remove build artifacts and cache
 	rm -rf build/ dist/ *.egg-info .pytest_cache .mypy_cache .ruff_cache

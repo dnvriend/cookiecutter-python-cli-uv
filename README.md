@@ -85,7 +85,7 @@ When you run the template, you'll be prompted for these values:
 my-cli-tool/
 ├── my_cli_tool/              # Main package
 │   ├── __init__.py           # Package initialization with version
-│   ├── cli.py                # Click-based CLI entry point
+│   ├── cli.py                # Typer-based CLI entry point
 │   └── utils.py              # Utility functions
 ├── tests/                    # Test suite
 │   ├── __init__.py
@@ -191,7 +191,7 @@ $ cookiecutter gh:dennisvriend/cookiecutter-python-cli-uv --no-input
 The generated project is fully yours to customize:
 
 1. **Add Dependencies**: Edit `pyproject.toml` dependencies section
-2. **Modify CLI**: Update `cli.py` with your commands using Click decorators
+2. **Modify CLI**: Update `cli.py` with your commands using Typer decorators
 3. **Add Features**: Create new modules in your package
 4. **Extend Tests**: Add test files in `tests/` directory
 5. **Update Docs**: Modify `README.md` and `CLAUDE.md`
@@ -225,7 +225,7 @@ This template embodies these principles:
 | Linter | ruff ✅ | flake8 | ruff |
 | Formatter | ruff ✅ | black | ruff |
 | Type Checker | mypy ✅ | mypy | mypy |
-| CLI Framework | click ✅ | click | click |
+| CLI Framework | typer ✅ | click | click |
 | Test Framework | pytest ✅ | pytest | pytest |
 | AI Attribution | Yes ✅ | No | No |
 | Modern Makefile | Yes ✅ | Yes | Yes |
@@ -265,7 +265,7 @@ This template was created using [Claude Code](https://www.anthropic.com/claude/c
 
 - Inspired by [cookiecutter-pypackage](https://github.com/audreyfeldroy/cookiecutter-pypackage)
 - Built with modern Python tooling: [uv](https://github.com/astral-sh/uv), [ruff](https://github.com/astral-sh/ruff), [mypy](https://github.com/python/mypy)
-- CLI framework: [Click](https://click.palletsprojects.com/)
+- CLI framework: [Typer](https://typer.tiangolo.com/)
 - Version management: [mise](https://mise.jdx.dev/)
 
 ---
